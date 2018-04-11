@@ -14,8 +14,7 @@ class Braintree extends Component
     public $merchantId;
     public $publicKey;
     public $privateKey;
-
-    private $_prefix = 'Braintree';
+    public $gateway;
 
     public function init()
     {
@@ -32,6 +31,11 @@ class Braintree extends Component
             throw new InvalidConfigException('Private Key is required');
         }
 
+        \Braintree_Configuration::environment($this->environment);
+        \Braintree_Configuration::merchantId($this->merchantId);
+        \Braintree_Configuration::publicKey($this->publicKey);
+        \Braintree_Configuration::privateKey($this->privateKey);
+
         $this->setupConfig();
     }
 
@@ -40,25 +44,11 @@ class Braintree extends Component
      */
     public function setupConfig()
     {
-        \Braintree_Configuration::environment($this->environment);
-        \Braintree_Configuration::merchantId($this->merchantId);
-        \Braintree_Configuration::publicKey($this->publicKey);
-        \Braintree_Configuration::privateKey($this->privateKey);
-    }
-
-    /**
-     * @param $command
-     * @param $method
-     * @param $values
-     * @return mixed
-     */
-    public function call($command, $method, $values)
-    {
-        $class = strtr("{class}_{command}", [
-            '{class}' => $this->_prefix,
-            '{command}' => $command,
+        $this->gateway = new \Braintree_Gateway([
+            'environment' => $this->environment,
+            'merchantId' => $this->merchantId,
+            'publicKey' => $this->publicKey,
+            'privateKey' => $this->privateKey
         ]);
-
-        return call_user_func(array($class, $method), $values);
     }
-} 
+}
